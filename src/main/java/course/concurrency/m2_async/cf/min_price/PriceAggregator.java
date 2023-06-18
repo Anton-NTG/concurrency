@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.lang.Double.NaN;
 
 public class PriceAggregator {
+    private final ExecutorService customExecutor = Executors.newCachedThreadPool();
 
     private PriceRetriever priceRetriever = new PriceRetriever();
 
@@ -22,24 +23,32 @@ public class PriceAggregator {
 
     public double getMinPrice(long itemId) {
         // place for your code
-        ExecutorService customExecutor = Executors.newCachedThreadPool();
         List<CompletableFuture<Double>> priceTasks = new ArrayList<>();
         for (long shopId: shopIds) {
             priceTasks.add(CompletableFuture.supplyAsync(() ->
                     priceRetriever.getPrice(itemId, shopId), customExecutor));
         }
 
+
         CompletableFuture<Void> futures = CompletableFuture.allOf(priceTasks.toArray(new CompletableFuture[0]));
-        futures.completeOnTimeout(null, 2900, TimeUnit.MILLISECONDS);
-        CompletableFuture<Double> resultFuture = futures.handle((result, ex) ->
+        return futures.completeOnTimeout(null, 2900, TimeUnit.MILLISECONDS).handle((result, ex) ->
             priceTasks.stream()
                 .filter(future -> future.isDone() && !future.isCompletedExceptionally())
                 .mapToDouble(CompletableFuture::join)
                 .min()
                 .orElse(NaN)
-        );
-        customExecutor.shutdown();
-        return resultFuture.join();
+        ).join();
+
+//        CompletableFuture<Double> resultFuture = futures.handle((result, ex) ->
+//            priceTasks.stream()
+//                .filter(future -> future.isDone() && !future.isCompletedExceptionally())
+//                .mapToDouble(CompletableFuture::join)
+//                .min()
+//                .orElse(NaN)
+//        );
+//        customExecutor.shutdown();
+//        return resultFuture.join();
+
 //        try {
 //            futures.get(2900, TimeUnit.MILLISECONDS);
 //        } catch (InterruptedException | ExecutionException | TimeoutException e) {}
