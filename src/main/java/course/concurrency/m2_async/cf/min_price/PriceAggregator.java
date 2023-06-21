@@ -26,12 +26,9 @@ public class PriceAggregator {
         List<CompletableFuture<Double>> priceTasks = new ArrayList<>();
         for (long shopId: shopIds) {
             priceTasks.add(CompletableFuture.supplyAsync(() ->
-                    priceRetriever.getPrice(itemId, shopId), customExecutor).handle((result, ex) -> {
-                        if (ex != null) {
-                            System.out.println("Exception : " + ex.getMessage());
-                            return NaN;
-                        }
-                        return result;
+                    priceRetriever.getPrice(itemId, shopId), customExecutor).exceptionally(ex -> {
+                        System.out.println("Exception : " + ex.getMessage());
+                        return NaN;
             }));
         }
 
@@ -39,9 +36,9 @@ public class PriceAggregator {
         futures.completeOnTimeout(null, 2900, TimeUnit.MILLISECONDS).join();
 
         return priceTasks.stream()
-                .filter(future -> future.isDone() /* && !future.isCompletedExceptionally()*/)
+                .filter(CompletableFuture::isDone)
                 .mapToDouble(CompletableFuture::join)
-                .filter(d -> !Double.valueOf(d).isNaN())
+                .filter(Double::isFinite)
                 .min()
                 .orElse(NaN);
 
