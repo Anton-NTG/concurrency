@@ -21,7 +21,7 @@ public class AMRVsSynchronizedTests {
     public void testAMRWrite() {
         for (int i = 0; i < 1000000; i++) {
             executor.submit(() ->
-                    testObject.runARMWrite(Thread.currentThread().getName(), true));
+                    testObject.runAMRWrite(Thread.currentThread().getName(), true));
         }
     }
 
@@ -36,7 +36,7 @@ public class AMRVsSynchronizedTests {
     @Test
     public void testAMRRead() {
         for (int i = 0; i < 1000000; i++) {
-            executor.submit(testObject::runARMRead);
+            executor.submit(testObject::runAMRRead);
         }
     }
 

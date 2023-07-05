@@ -10,7 +10,7 @@ public class AMRVsSynchronized {
     private static final AtomicMarkableReference<String> reference = new AtomicMarkableReference<>(
             "Initial Value", false);
 
-    public void runARMWrite(String newValue, boolean newMark) {
+    public void runAMRWrite(String newValue, boolean newMark) {
         String currentValue;
         boolean currentMark;
         do {
@@ -25,7 +25,7 @@ public class AMRVsSynchronized {
         flag = newMark;
     }
 
-    public void runARMRead() {
+    public void runAMRRead() {
         String value = reference.getReference();
         boolean mark = reference.isMarked();
     }
