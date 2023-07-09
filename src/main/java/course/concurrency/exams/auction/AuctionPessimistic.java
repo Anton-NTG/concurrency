@@ -1,9 +1,5 @@
 package course.concurrency.exams.auction;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public class AuctionPessimistic implements Auction {
 
     private Notifier notifier;
