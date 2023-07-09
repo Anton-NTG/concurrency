@@ -15,8 +15,8 @@ public class AuctionStoppableOptimistic implements AuctionStoppable {
             new AtomicMarkableReference<>(new Bid(0L, 0L, 0L), true);
 
     public boolean propose(Bid bid) {
-        Bid expectedLatestBid;
         if (!latestBid.isMarked()) return false;
+        Bid expectedLatestBid;
         do {
             expectedLatestBid = latestBid.getReference();
             if (bid.getPrice() <= expectedLatestBid.getPrice()) return false;
