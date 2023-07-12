@@ -13,7 +13,7 @@ public class RestaurantService {
         put("C", new Restaurant("C"));
     }};
 
-    private Object stat;
+    private ConcurrentHashMap<String, Integer> stat;
 
     public Restaurant getByName(String restaurantName) {
         addToStat(restaurantName);

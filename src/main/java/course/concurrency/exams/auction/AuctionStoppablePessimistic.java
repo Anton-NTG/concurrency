@@ -17,9 +17,7 @@ public class AuctionStoppablePessimistic implements AuctionStoppable {
         if (!active) return false;
         if (bid.getPrice() <= latestBid.getPrice()) return false;
         synchronized (lock) {
-            if (bid.getPrice() <= latestBid.getPrice()) {
-                return false;
-            } else if (active) {
+            if (active && bid.getPrice() > latestBid.getPrice()) {
                 notifier.sendOutdatedMessage(latestBid);
                 latestBid = bid;
                 return true;
