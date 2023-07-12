@@ -4,6 +4,7 @@ import course.concurrency.exams.auction.ExecutionStatistics;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
