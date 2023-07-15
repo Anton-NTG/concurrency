@@ -21,14 +21,15 @@ public class RestaurantService {
         return restaurantMap.get(restaurantName);
     }
 
-    public void addToStat(String restaurantName) {
+    public synchronized void addToStat(String restaurantName) {
         // your code
 //        synchronized (this) {
 //        Integer val = stat.get(restaurantName);
 //        Integer statValue = Optional.ofNullable(val).map(i -> i + 1).orElse(1);
 //        stat.put(restaurantName, statValue);
 //        }
-        stat.compute(restaurantName, (key, value) -> value == null ? 1 : value + 1);
+        //stat.compute(restaurantName, (key, value) -> value == null ? 1 : value + 1);
+        stat.merge(restaurantName, 1, (k, value) -> value + 1);
     }
 
     public Set<String> printStat() {
