@@ -56,7 +56,7 @@ public final class Order {
         return new Order(this.id, this.items, paymentInfo, this.isPacked, Status.IN_PROGRESS);
     }
 
-    public Order updatedPacked(boolean isPacked) {
+    public Order packed(boolean isPacked) {
         return new Order(this.id, this.items, this.paymentInfo, isPacked, Status.IN_PROGRESS);
     }
 

@@ -1,5 +1,6 @@
 package course.concurrency.m3_shared.immutable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +28,7 @@ public class OrderService {
     }
 
     public void setPacked(long orderId) {
-        Order order = currentOrders.computeIfPresent(orderId, (key, value) -> value.updatedPacked(true));
+        Order order = currentOrders.computeIfPresent(orderId, (key, value) -> value.packed(true));
         if (order != null && order.checkStatus()) {
             deliver(currentOrders.get(orderId));
         }
@@ -39,7 +40,10 @@ public class OrderService {
     }
 
     public boolean isDelivered(long orderId) {
-        return currentOrders.get(orderId).getStatus().equals(Order.Status.DELIVERED);
+        return currentOrders
+                .getOrDefault(orderId, Order.createOrder(0L, new ArrayList<>()))
+                .getStatus()
+                .equals(Order.Status.DELIVERED);
     }
 }
 
