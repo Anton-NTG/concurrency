@@ -3,14 +3,15 @@ package course.concurrency.m3_shared.immutable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class OrderService {
 
     private final ConcurrentHashMap<Long, Order> currentOrders = new ConcurrentHashMap<>();
-    private long nextId = 0L;
+    private AtomicLong nextId = new AtomicLong(0L);
 
     private long nextId() {
-        return nextId++;
+        return nextId.incrementAndGet();
     }
 
     public long createOrder(List<Item> items) {
