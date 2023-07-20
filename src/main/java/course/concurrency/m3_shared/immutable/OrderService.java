@@ -24,14 +24,14 @@ public class OrderService {
     public void updatePaymentInfo(long orderId, PaymentInfo paymentInfo) {
         Order order = currentOrders.computeIfPresent(orderId, (key, value) -> value.updatedPaymentInfo(paymentInfo));
         if (order != null && order.checkStatus()) {
-            deliver(currentOrders.get(orderId));
+            deliver(order);
         }
     }
 
     public void setPacked(long orderId) {
         Order order = currentOrders.computeIfPresent(orderId, (key, value) -> value.packed(true));
         if (order != null && order.checkStatus()) {
-            deliver(currentOrders.get(orderId));
+            deliver(order);
         }
     }
 

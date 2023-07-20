@@ -18,8 +18,9 @@ public class OrderServiceTests {
     @Test
     public void testDelivery() {
         long orderId = service.createOrder(items);
-        service.setPacked(orderId);
+
         service.updatePaymentInfo(orderId, new PaymentInfo());
+        service.setPacked(orderId);
 
         boolean isDelivered = service.isDelivered(orderId);
         assertTrue(isDelivered);
