@@ -30,20 +30,23 @@ public class RestaurantService {
 //        stat.put(restaurantName, statValue);
 //        }
         //stat.compute(restaurantName, (key, value) -> value == null ? 1 : value + 1);
-        stat.compute(restaurantName, (key, value) -> {
-            if (value == null) {
-                value = new LongAdder();
-            }
-            value.increment();
-            return value;
-        });
+
+        LongAdder adder = stat.computeIfAbsent(restaurantName, k -> new LongAdder());
+        adder.increment();
+//        stat.compute(restaurantName, (key, value) -> {
+//            if (value == null) {
+//                value = new LongAdder();
+//            }
+//            value.increment();
+//            return value;
+//        });
         //stat.merge(restaurantName, 1, (k, value) -> value + 1);
     }
 
     public Set<String> printStat() {
         // your code
         HashSet<String> set = new HashSet<>();
-        stat.forEach((key, value) -> set.add(key + " - " + value));
+        stat.forEach((key, value) -> set.add(key + " - " + value.sum()));
         return set;
         //return new HashSet<>();
     }
