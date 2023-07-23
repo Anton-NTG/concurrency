@@ -26,7 +26,12 @@ public final class Order {
     }
 
     public boolean checkStatus() {
-        if (items != null && !items.isEmpty() && paymentInfo != null && isPacked) {
+        if (items != null
+                && !items.isEmpty()
+                && paymentInfo != null
+                && isPacked
+                && this.status != Order.Status.DELIVERED
+        ) {
             return true;
         }
         return false;
