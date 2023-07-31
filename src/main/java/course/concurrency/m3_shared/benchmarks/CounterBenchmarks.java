@@ -18,8 +18,8 @@ import java.util.concurrent.locks.*;
 public class CounterBenchmarks {
 
     // Change WRITERS and READERS to experiment
-    public static final int WRITERS = 7;
-    public static final int READERS = 1;
+    public static final int WRITERS = 3;
+    public static final int READERS = 21;
 
     private final AtomicLong atomicLongCounter = new AtomicLong();
     private final LongAdder longAdderCounter = new LongAdder();
