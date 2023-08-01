@@ -6,12 +6,15 @@ public class ThreadPoolTask {
 
     // Task #1
     public ThreadPoolExecutor getLifoExecutor() {
+
+        BlockingDeque<Runnable> deque = new LinkedBlockingDeque<>();
+
         return new ThreadPoolExecutor(
                 2,
                 4,
                 10L,
                 TimeUnit.SECONDS,
-                new LifoBlockingDeque<>()
+                deque
         );
     }
 
@@ -23,9 +26,7 @@ public class ThreadPoolTask {
                 10L,
                 TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
-                (runnable, executor) -> {
-                    System.out.println("Rejected");
-                }
+                new ThreadPoolExecutor.DiscardPolicy()
         );
     }
 }
