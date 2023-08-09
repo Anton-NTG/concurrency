@@ -10,10 +10,9 @@ public class Consumer <T> implements Runnable {
     public void run() {
         while (true) {
             synchronized (this.queue) {
-                if (this.queue.getLength() > 0) {
+                if (!this.queue.isEmpty()) {
                     T value = this.queue.dequeue();
                     System.out.println(value);
-                    this.queue.queueWait();
                 }
             }
         }

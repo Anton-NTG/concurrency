@@ -5,7 +5,7 @@ import java.lang.reflect.Array;
 public class Queue <T> {
 
     private volatile T[] queue;
-    private volatile int index = 0;
+    private volatile int index = -1;
     private final int capacity;
     private final Class<T> cls;
 
@@ -18,34 +18,46 @@ public class Queue <T> {
     }
 
     synchronized void enqueue(T item) {
-        if (index == this.capacity) return;
-        queue[index] = item;
+        while (isFull()) blockQueue();
         index++;
-        this.notify();
+        queue[index] = item;
+        notify();
     }
 
     synchronized T dequeue() {
+        while (isEmpty()) blockQueue();
         T value = queue[0];
         @SuppressWarnings("unchecked")
         T[] q = (T[]) Array.newInstance(cls, capacity);
-        System.arraycopy(queue, 1, q, 0, queue.length - 1);
+        System.arraycopy(queue, 1, q, 0, size() - 1);
         queue = q;
         index--;
+        notify();
         return value;
     }
 
-    synchronized void queueWait() {
-        if (getLength() == 0) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+    synchronized void blockQueue() {
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    int getLength() {
-        return index;
+    synchronized boolean isEmpty() {
+        return index == -1;
+    }
+
+    synchronized boolean isFull() {
+        return index == capacity - 1;
+    }
+
+    synchronized int size() {
+        return index + 1;
+    }
+
+    synchronized T get(int index) {
+        return queue[index];
     }
 
     public static void main(String[] args) throws InterruptedException {
