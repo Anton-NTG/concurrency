@@ -20,7 +20,8 @@ public class Queue <T> {
     synchronized void enqueue(T item) {
         if (index == this.capacity) return;
         queue[index] = item;
-        if (index < this.capacity) index++;
+        index++;
+        this.notify();
     }
 
     synchronized T dequeue() {
@@ -33,6 +34,16 @@ public class Queue <T> {
         return value;
     }
 
+    void queueWait() {
+        if (index == 0) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     int getLength() {
         return index;
     }
@@ -42,8 +53,14 @@ public class Queue <T> {
         Producer<String> producer = new Producer<>(queue);
         Consumer<String> consumer = new Consumer<>(queue);
 
-        new Thread(producer).start();
-        new Thread(consumer).start();
+        Thread producerThread = new Thread(producer);
+        Thread consumerThread = new Thread(consumer);
+
+        producerThread.setDaemon(true);
+        consumerThread.setDaemon(true);
+
+        producerThread.start();
+        consumerThread.start();
 
         producer.produce("aaa");
 
@@ -52,9 +69,6 @@ public class Queue <T> {
         producer.produce("bbb");
 
         Thread.sleep(1000);
-
-        producer.halt();
-        consumer.halt();
 
     }
 }
