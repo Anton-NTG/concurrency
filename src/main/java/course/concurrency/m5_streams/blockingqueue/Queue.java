@@ -34,8 +34,8 @@ public class Queue <T> {
         return value;
     }
 
-    void queueWait() {
-        if (index == 0) {
+    synchronized void queueWait() {
+        if (getLength() == 0) {
             try {
                 this.wait();
             } catch (InterruptedException e) {
