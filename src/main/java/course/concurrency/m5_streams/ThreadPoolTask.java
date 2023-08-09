@@ -6,16 +6,8 @@ public class ThreadPoolTask {
 
     // Task #1
     public ThreadPoolExecutor getLifoExecutor() {
-
-        BlockingDeque<Runnable> deque = new LinkedBlockingDeque<>();
-
-        return new ThreadPoolExecutor(
-                2,
-                4,
-                10L,
-                TimeUnit.SECONDS,
-                deque
-        );
+        LifoBlockingDeque<Runnable> blockingDeque = new LifoBlockingDeque<>();
+        return new ThreadPoolExecutor(8, 8, 10L, TimeUnit.SECONDS, blockingDeque);
     }
 
     // Task #2
