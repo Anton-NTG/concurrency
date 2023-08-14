@@ -34,11 +34,11 @@ public class MountTableRefresherThread extends Thread {
      */
     @Override
     public void run() {
-        try {
+        //try {
             success = manager.refresh();
-        } finally {
-            countDownLatch.countDown();
-        }
+//        } finally {
+//            countDownLatch.countDown();
+//        }
     }
 
     /**

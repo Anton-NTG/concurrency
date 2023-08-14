@@ -3,6 +3,9 @@ package course.concurrency.exams.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+
+import static java.lang.Double.NaN;
 
 
 public class MountTableRefresherService {
@@ -63,30 +66,75 @@ public class MountTableRefresherService {
     /**
      * Refresh mount table cache of this router as well as all other routers.
      */
-    public void refresh()  {
+//    public void refresh()  {
+//
+//        List<Others.RouterState> cachedRecords = routerStore.getCachedRecords();
+//        List<MountTableRefresherThread> refreshThreads = new ArrayList<>();
+//        for (Others.RouterState routerState : cachedRecords) {
+//            String adminAddress = routerState.getAdminAddress();
+//            if (adminAddress == null || adminAddress.length() == 0) {
+//                // this router has not enabled router admin.
+//                continue;
+//            }
+//            if (isLocalAdmin(adminAddress)) {
+//                /*
+//                 * Local router's cache update does not require RPC call, so no need for
+//                 * RouterClient
+//                 */
+//                refreshThreads.add(getLocalRefresher(adminAddress));
+//            } else {
+//                refreshThreads.add(new MountTableRefresherThread(
+//                            new Others.MountTableManager(adminAddress), adminAddress));
+//            }
+//        }
+//        if (!refreshThreads.isEmpty()) {
+//            invokeRefresh(refreshThreads);
+//        }
+//    }
 
+    public void refresh() {
         List<Others.RouterState> cachedRecords = routerStore.getCachedRecords();
-        List<MountTableRefresherThread> refreshThreads = new ArrayList<>();
+        List<CompletableFuture<MountTableRefresherThread>> refreshThreads = new ArrayList<>();
         for (Others.RouterState routerState : cachedRecords) {
             String adminAddress = routerState.getAdminAddress();
             if (adminAddress == null || adminAddress.length() == 0) {
                 // this router has not enabled router admin.
                 continue;
             }
+            MountTableRefresherThread thread = new MountTableRefresherThread(
+                    new Others.MountTableManager(adminAddress), adminAddress);
             if (isLocalAdmin(adminAddress)) {
                 /*
                  * Local router's cache update does not require RPC call, so no need for
                  * RouterClient
                  */
-                refreshThreads.add(getLocalRefresher(adminAddress));
-            } else {
-                refreshThreads.add(new MountTableRefresherThread(
-                            new Others.MountTableManager(adminAddress), adminAddress));
+                thread = getLocalRefresher(adminAddress);
             }
+            MountTableRefresherThread t = thread;
+            refreshThreads.add(CompletableFuture.supplyAsync(() -> {
+                t.start();
+                try {
+                    t.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return t;
+            }).exceptionally(ex -> {
+                System.out.println("Exception : " + ex.getMessage());
+                return t;
+            }));
         }
-        if (!refreshThreads.isEmpty()) {
-            invokeRefresh(refreshThreads);
-        }
+
+        CompletableFuture<Void> futures = CompletableFuture.allOf(refreshThreads.toArray(new CompletableFuture[0]));
+        futures.completeOnTimeout(null, 10, TimeUnit.SECONDS).join();
+
+        List<MountTableRefresherThread> result = refreshThreads
+                .stream()
+                .filter(CompletableFuture::isDone)
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
+
+        logResult(result);
     }
 
     protected MountTableRefresherThread getLocalRefresher(String adminAddress) {

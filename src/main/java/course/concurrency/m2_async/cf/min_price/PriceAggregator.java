@@ -26,9 +26,9 @@ public class PriceAggregator {
         List<CompletableFuture<Double>> priceTasks = new ArrayList<>();
         for (long shopId: shopIds) {
             priceTasks.add(CompletableFuture.supplyAsync(() ->
-                    priceRetriever.getPrice(itemId, shopId), customExecutor).exceptionally(ex -> {
-                        System.out.println("Exception : " + ex.getMessage());
-                        return NaN;
+                priceRetriever.getPrice(itemId, shopId), customExecutor).exceptionally(ex -> {
+                    System.out.println("Exception : " + ex.getMessage());
+                    return NaN;
             }));
         }
 

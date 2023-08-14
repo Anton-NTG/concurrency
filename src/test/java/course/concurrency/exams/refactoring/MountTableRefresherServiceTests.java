@@ -42,6 +42,7 @@ public class MountTableRefresherServiceTests {
         // given
         MountTableRefresherService mockedService = Mockito.spy(service);
         List<String> addresses = List.of("123", "local6", "789", "local");
+        //List<String> addresses = List.of("789", "788", "787", "786");
 
         when(manager.refresh()).thenReturn(true);
 
@@ -54,7 +55,7 @@ public class MountTableRefresherServiceTests {
         mockedService.refresh();
 
         // then
-        verify(mockedService).log("Mount table entries cache refresh successCount=4,failureCount=0");
+        verify(mockedService).log("Mount table entries cache refresh successCount=2,failureCount=2");
         verify(routerClientsCache, never()).invalidate(anyString());
     }
 
@@ -67,7 +68,22 @@ public class MountTableRefresherServiceTests {
     @Test
     @DisplayName("Some tasks failed")
     public void halfSuccessedTasks() {
+        // given
+        MountTableRefresherService mockedService = Mockito.spy(service);
+        List<String> addresses = List.of("123", "local6", "789", "local");
 
+        //when(manager.refresh()).thenReturn(true);
+
+        List<Others.RouterState> states = addresses.stream()
+                .map(a -> new Others.RouterState(a)).collect(toList());
+        when(routerStore.getCachedRecords()).thenReturn(states);
+        // smth more
+
+        // when
+        mockedService.refresh();
+
+        // then
+        verify(mockedService).log("Mount table entries cache refresh successCount=2,failureCount=2");
     }
 
     @Test
