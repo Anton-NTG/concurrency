@@ -89,13 +89,5 @@ public class Others {
         public boolean refresh() {
             return ThreadLocalRandom.current().nextBoolean();
         }
-
-        public boolean refreshTrue() {
-            return true;
-        }
-
-        public boolean refreshFalse() {
-            return false;
-        }
     }
 }
