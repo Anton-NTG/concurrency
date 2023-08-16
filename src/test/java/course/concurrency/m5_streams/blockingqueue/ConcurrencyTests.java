@@ -48,6 +48,6 @@ public class ConcurrencyTests {
             e.printStackTrace();
         }
 
-        //assertTrue(queue.isEmpty());
+        assertTrue(queue.isEmpty());
     }
 }
