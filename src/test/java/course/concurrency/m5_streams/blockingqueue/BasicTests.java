@@ -8,7 +8,7 @@ public class BasicTests {
 
     @Test
     void enqueue() {
-        Queue<String> queue = new Queue<>(5);
+        Queue<String> queue = new Queue<>(String.class, 5);
         queue.enqueue("a");
         queue.enqueue("b");
         queue.enqueue("c");
@@ -20,7 +20,7 @@ public class BasicTests {
 
     @Test
     void dequeue() {
-        Queue<String> queue = new Queue<>(5);
+        Queue<String> queue = new Queue<>(String.class, 5);
         queue.enqueue("a");
         queue.enqueue("b");
         queue.enqueue("c");
@@ -32,7 +32,7 @@ public class BasicTests {
 
     @Test
     void isEmpty() {
-        Queue<String> queue = new Queue<>(5);
+        Queue<String> queue = new Queue<>(String.class, 5);
         assertTrue(queue.isEmpty());
 
         queue.enqueue("a");
@@ -44,7 +44,7 @@ public class BasicTests {
 
     @Test
     void isFull() {
-        Queue<String> queue = new Queue<>(2);
+        Queue<String> queue = new Queue<>(String.class, 2);
         assertFalse(queue.isFull());
 
         queue.enqueue("a");
@@ -60,7 +60,7 @@ public class BasicTests {
 
     @Test
     void size() {
-        Queue<String> queue = new Queue<>(5);
+        Queue<String> queue = new Queue<>(String.class, 5);
         assertEquals(0, queue.size());
 
         queue.enqueue("a");

@@ -8,7 +8,7 @@ public class BlockingTests {
 
     @Test
     void enqueueToFull() throws InterruptedException {
-        Queue<Integer> queue = new Queue<>(2);
+        Queue<Integer> queue = new Queue<>(Integer.class, 2);
 
         queue.enqueue(3);
         queue.enqueue(5);
@@ -23,7 +23,7 @@ public class BlockingTests {
 
     @Test
     void dequeueEmpty() throws InterruptedException {
-        Queue<Integer> queue = new Queue<>(2);
+        Queue<Integer> queue = new Queue<>(Integer.class, 2);
 
         new Thread(queue::dequeue).start();
         Thread.sleep(1000);
@@ -33,7 +33,7 @@ public class BlockingTests {
 
     @Test
     void unblockWhenSpaceAvailable() {
-        Queue<Integer> queue = new Queue<>(2);
+        Queue<Integer> queue = new Queue<>(Integer.class, 2);
 
         Thread enqueueThread = new Thread(() -> {
             try {
