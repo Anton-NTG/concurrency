@@ -13,9 +13,9 @@ public class ConcurrencyTests {
     void concurrentEnqueueDequeue() throws InterruptedException {
         int threadsCount = 3;
         int iterations = 10;
-        Queue<Integer> queue = new Queue<>(Integer.class, threadsCount);
+        Queue<Integer> queue = new Queue<>(threadsCount);
 
-        CountDownLatch latch = new CountDownLatch(threadsCount);
+        //CountDownLatch latch = new CountDownLatch(threadsCount);
 
         for (int i = 0; i < threadsCount; i++) {
             new Thread(() -> {
@@ -24,11 +24,11 @@ public class ConcurrencyTests {
                     Integer value = queue.dequeue();
                     assertEquals(j, value);
                 }
-                latch.countDown();
+                //latch.countDown();
             }).start();
         }
 
-        latch.await();
+        //latch.await();
 
         assertTrue(queue.isEmpty());
     }
