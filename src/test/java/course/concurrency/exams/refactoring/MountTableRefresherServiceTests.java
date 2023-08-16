@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
@@ -43,29 +43,59 @@ public class MountTableRefresherServiceTests {
         // given
         MountTableRefresherService mockedService = Mockito.spy(service);
         List<String> addresses = List.of("123", "local6", "789", "local");
-        //List<String> addresses = List.of("789", "788", "787", "786");
 
         when(manager.refresh()).thenReturn(true);
 
         List<Others.RouterState> states = addresses.stream()
                 .map(a -> new Others.RouterState(a)).collect(toList());
         when(routerStore.getCachedRecords()).thenReturn(states);
+
         // smth more
+        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        for (int i = 0; i < refreshThreads.size(); i++) {
+            String adminAddress = refreshThreads.get(i).getAdminAddress();
+            refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithSuccess(
+                    new Others.MountTableManager(adminAddress), adminAddress
+            ));
+        }
+        when(routerStore.getRefreshThreads(states)).thenReturn(refreshThreads);
 
         // when
         mockedService.refresh();
 
         // then
-        verify(mockedService).log("Mount table entries cache refresh successCount=2,failureCount=2");
-        //verify(routerClientsCache, never()).invalidate(anyString());
-
-
+        verify(mockedService).log("Mount table entries cache refresh successCount=4,failureCount=0");
+        verify(routerClientsCache, never()).invalidate(anyString());
     }
 
     @Test
     @DisplayName("All tasks failed")
     public void noSuccessfulTasks() {
+        // given
+        MountTableRefresherService mockedService = Mockito.spy(service);
+        List<String> addresses = List.of("123", "local6", "789", "local");
 
+        when(manager.refresh()).thenReturn(true);
+
+        List<Others.RouterState> states = addresses.stream()
+                .map(a -> new Others.RouterState(a)).collect(toList());
+        when(routerStore.getCachedRecords()).thenReturn(states);
+
+        // smth more
+        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        for (int i = 0; i < refreshThreads.size(); i++) {
+            String adminAddress = refreshThreads.get(i).getAdminAddress();
+            refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithFailure(
+                    new Others.MountTableManager(adminAddress), adminAddress
+            ));
+        }
+        when(routerStore.getRefreshThreads(states)).thenReturn(refreshThreads);
+
+        // when
+        mockedService.refresh();
+
+        // then
+        verify(mockedService).log("Mount table entries cache refresh successCount=0,failureCount=4");
     }
 
     @Test
@@ -80,7 +110,24 @@ public class MountTableRefresherServiceTests {
         List<Others.RouterState> states = addresses.stream()
                 .map(a -> new Others.RouterState(a)).collect(toList());
         when(routerStore.getCachedRecords()).thenReturn(states);
+
         // smth more
+        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        int randomNum1 = ThreadLocalRandom.current().nextInt(0, 4);
+        int randomNum2 = ThreadLocalRandom.current().nextInt(0, 4);
+        for (int i = 0; i < refreshThreads.size(); i++) {
+            String adminAddress = refreshThreads.get(i).getAdminAddress();
+            if (i == randomNum1 || i == randomNum2) {
+                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithSuccess(
+                        new Others.MountTableManager(adminAddress), adminAddress
+                ));
+            } else {
+                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithFailure(
+                        new Others.MountTableManager(adminAddress), adminAddress
+                ));
+            }
+        }
+        when(routerStore.getRefreshThreads(states)).thenReturn(refreshThreads);
 
         // when
         mockedService.refresh();
@@ -97,9 +144,20 @@ public class MountTableRefresherServiceTests {
 
         List<Others.RouterState> states = addresses.stream()
                 .map(a -> new Others.RouterState(a)).collect(toList());
-        //when(routerStore.getCachedRecords()).thenReturn(states);
+        when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
+        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+        for (int i = 0; i < refreshThreads.size(); i++) {
+            if (i == randomNum) {
+                String adminAddress = refreshThreads.get(i).getAdminAddress();
+                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithException(
+                        new Others.MountTableManager(adminAddress), adminAddress
+                ));
+            }
+        }
+        when(routerStore.getRefreshThreads(states)).thenReturn(refreshThreads);
 
         // when
         mockedService.refresh();
@@ -119,6 +177,17 @@ public class MountTableRefresherServiceTests {
         when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
+        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+        for (int i = 0; i < refreshThreads.size(); i++) {
+            if (i == randomNum) {
+                String adminAddress = refreshThreads.get(i).getAdminAddress();
+                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithTimeout(
+                        new Others.MountTableManager(adminAddress), adminAddress
+                ));
+            }
+        }
+        when(routerStore.getRefreshThreads(states)).thenReturn(refreshThreads);
 
         // when
         mockedService.refresh();

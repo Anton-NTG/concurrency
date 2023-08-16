@@ -91,46 +91,15 @@ public class MountTableRefresherService {
 
     public void refresh() {
         List<Others.RouterState> cachedRecords = routerStore.getCachedRecords();
+        List<MountTableRefresherThread> threads = routerStore.getRefreshThreads(cachedRecords);
         List<CompletableFuture<MountTableRefresherThread>> refreshThreads = new ArrayList<>();
-        for (Others.RouterState routerState : cachedRecords) {
-            String adminAddress = routerState.getAdminAddress();
-            if (adminAddress == null || adminAddress.length() == 0) {
-                // this router has not enabled router admin.
-                continue;
-            }
-            MountTableRefresherThread thread = new MountTableRefresherThread(
-                    new Others.MountTableManager(adminAddress), adminAddress);
-            if (isLocalAdmin(adminAddress)) {
-                /*
-                 * Local router's cache update does not require RPC call, so no need for
-                 * RouterClient
-                 */
-                thread = getLocalRefresher(adminAddress);
-            }
-            MountTableRefresherThread t = thread;
+        for (MountTableRefresherThread thread : threads) {
             refreshThreads.add(CompletableFuture.supplyAsync(() -> {
-                t.start();
-// oneTaskExceedTimeout()
-//                if (adminAddress.equals("1231")) {
-//                    try {
-//                        Thread.sleep(2000);
-//                    } catch (InterruptedException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-                try {
-                    t.join();
-                } catch (InterruptedException e) {
-                    log("Mount table cache refresher was interrupted.");
-                }
-// exceptionInOneTask()
-//                if (adminAddress.equals("1231")) {
-//                    throw new RuntimeException();
-//                }
-                return t;
+                thread.run();
+                return thread;
             }).exceptionally(ex -> {
                 log("Exception occurred in mount table cache refresher");
-                return t;
+                return thread;
             }));
         }
 
@@ -149,10 +118,6 @@ public class MountTableRefresherService {
                 .collect(Collectors.toList());
 
         logResult(result);
-    }
-
-    protected MountTableRefresherThread getLocalRefresher(String adminAddress) {
-        return new MountTableRefresherThread(new Others.MountTableManager("local"), adminAddress);
     }
 
     private void removeFromCache(String adminAddress) {
@@ -180,10 +145,6 @@ public class MountTableRefresherService {
             log("Mount table cache refresher was interrupted.");
         }
         logResult(refreshThreads);
-    }
-
-    private boolean isLocalAdmin(String adminAddress) {
-        return adminAddress.contains("local");
     }
 
     private void logResult(List<MountTableRefresherThread> refreshThreads) {

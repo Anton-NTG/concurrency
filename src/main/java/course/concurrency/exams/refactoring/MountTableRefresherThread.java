@@ -34,11 +34,11 @@ public class MountTableRefresherThread extends Thread {
      */
     @Override
     public void run() {
-        //try {
-            success = manager.refresh();
-//        } finally {
-//            countDownLatch.countDown();
-//        }
+        success = manager.refresh();
+    }
+
+    protected void setSuccess(boolean success) {
+        this.success = success;
     }
 
     /**
@@ -61,4 +61,53 @@ public class MountTableRefresherThread extends Thread {
     public String getAdminAddress() {
         return adminAddress;
     }
+
+    public static class MountTableRefresherThreadWithException extends MountTableRefresherThread {
+        public MountTableRefresherThreadWithException(MountTableManager manager, String adminAddress) {
+            super(manager, adminAddress);
+        }
+
+        @Override
+        public void run() {
+            throw new RuntimeException();
+        }
+    }
+
+    public static class MountTableRefresherThreadWithTimeout extends MountTableRefresherThread {
+        public MountTableRefresherThreadWithTimeout(MountTableManager manager, String adminAddress) {
+            super(manager, adminAddress);
+        }
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class MountTableRefresherThreadWithSuccess extends MountTableRefresherThread {
+        public MountTableRefresherThreadWithSuccess(MountTableManager manager, String adminAddress) {
+            super(manager, adminAddress);
+        }
+
+        @Override
+        public void run() {
+            setSuccess(true);
+        }
+    }
+
+    public static class MountTableRefresherThreadWithFailure extends MountTableRefresherThread {
+        public MountTableRefresherThreadWithFailure(MountTableManager manager, String adminAddress) {
+            super(manager, adminAddress);
+        }
+
+        @Override
+        public void run() {
+            setSuccess(false);
+        }
+    }
 }
+

@@ -43,9 +43,39 @@ public class Others {
 
     public static class RouterStore {
         List<RouterState> states = new ArrayList<>();
+        List<MountTableRefresherThread> refreshThreads = new ArrayList<>();
 
         public List<RouterState> getCachedRecords() {
             return states;
+        }
+        public List<MountTableRefresherThread> getRefreshThreads(List<Others.RouterState> cachedRecords) {
+            for (Others.RouterState routerState : cachedRecords) {
+                String adminAddress = routerState.getAdminAddress();
+                if (adminAddress == null || adminAddress.length() == 0) {
+                    // this router has not enabled router admin.
+                    continue;
+                }
+                MountTableRefresherThread thread = new MountTableRefresherThread(
+                        new Others.MountTableManager(adminAddress), adminAddress);
+                if (isLocalAdmin(adminAddress)) {
+                    /*
+                     * Local router's cache update does not require RPC call, so no need for
+                     * RouterClient
+                     */
+                    thread = getLocalRefresher(adminAddress);
+                }
+                refreshThreads.add(thread);
+            }
+
+            return refreshThreads;
+        }
+
+        protected MountTableRefresherThread getLocalRefresher(String adminAddress) {
+            return new MountTableRefresherThread(new Others.MountTableManager("local"), adminAddress);
+        }
+
+        private boolean isLocalAdmin(String adminAddress) {
+            return adminAddress.contains("local");
         }
     }
 
