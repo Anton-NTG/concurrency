@@ -6,6 +6,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.text.SimpleDateFormat;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -353,6 +354,7 @@ public class CounterBenchmarks {
             previous = atomic.get();
             tmp = previous + newValue;
         } while (!atomic.compareAndSet(previous, newValue));
+
         return newValue;
     }
 
