@@ -25,7 +25,7 @@ public class ConcurrencyTests {
                 latch.countDown();
                 for (int j = 0; j < iterations; j++) {
                     queue.enqueue(j);
-                    Integer value = queue.dequeue();
+                    queue.dequeue();
                 }
             }));
         }
