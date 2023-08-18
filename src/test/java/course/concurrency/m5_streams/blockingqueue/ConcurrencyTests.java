@@ -22,11 +22,11 @@ public class ConcurrencyTests {
 
         for (int i = 0; i < threadsCount; i++) {
             executor.submit(new Thread(() -> {
+                latch.countDown();
                 for (int j = 0; j < iterations; j++) {
                     queue.enqueue(j);
                     Integer value = queue.dequeue();
                 }
-                latch.countDown();
             }));
         }
 
