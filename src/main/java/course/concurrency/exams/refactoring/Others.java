@@ -43,12 +43,12 @@ public class Others {
 
     public static class RouterStore {
         List<RouterState> states = new ArrayList<>();
-        List<MountTableRefresher> refreshThreads = new ArrayList<>();
+        List<MountTableRefresher> refreshTasks = new ArrayList<>();
 
         public List<RouterState> getCachedRecords() {
             return states;
         }
-        public List<MountTableRefresher> getRefreshThreads(List<Others.RouterState> cachedRecords) {
+        public List<MountTableRefresher> getRefreshTasks(List<Others.RouterState> cachedRecords) {
             for (Others.RouterState routerState : cachedRecords) {
                 String adminAddress = routerState.getAdminAddress();
                 if (adminAddress == null || adminAddress.length() == 0) {
@@ -64,10 +64,10 @@ public class Others {
                      */
                     thread = getLocalRefresher(adminAddress);
                 }
-                refreshThreads.add(thread);
+                refreshTasks.add(thread);
             }
 
-            return refreshThreads;
+            return refreshTasks;
         }
 
         protected MountTableRefresher getLocalRefresher(String adminAddress) {
