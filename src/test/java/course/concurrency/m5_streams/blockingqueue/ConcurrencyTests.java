@@ -12,12 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ConcurrencyTests {
 
     @Test
-    void concurrentEnqueueDequeue() {
+    void concurrentEnqueueDequeue() throws InterruptedException {
         int threadsCount = 100;
         int iterations = 1000;
 
         ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
-        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(threadsCount);
         Queue<Integer> queue = new Queue<>(Integer.class, threadsCount);
 
         for (int i = 0; i < threadsCount; i++) {
@@ -26,10 +26,11 @@ public class ConcurrencyTests {
                     queue.enqueue(j);
                     Integer value = queue.dequeue();
                 }
+                latch.countDown();
             }));
         }
 
-        latch.countDown();
+        latch.await();
         executor.shutdown();
 
         try {
