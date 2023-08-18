@@ -43,19 +43,19 @@ public class Others {
 
     public static class RouterStore {
         List<RouterState> states = new ArrayList<>();
-        List<MountTableRefresherThread> refreshThreads = new ArrayList<>();
+        List<MountTableRefresher> refreshThreads = new ArrayList<>();
 
         public List<RouterState> getCachedRecords() {
             return states;
         }
-        public List<MountTableRefresherThread> getRefreshThreads(List<Others.RouterState> cachedRecords) {
+        public List<MountTableRefresher> getRefreshThreads(List<Others.RouterState> cachedRecords) {
             for (Others.RouterState routerState : cachedRecords) {
                 String adminAddress = routerState.getAdminAddress();
                 if (adminAddress == null || adminAddress.length() == 0) {
                     // this router has not enabled router admin.
                     continue;
                 }
-                MountTableRefresherThread thread = new MountTableRefresherThread(
+                MountTableRefresher thread = new MountTableRefresher(
                         new Others.MountTableManager(adminAddress), adminAddress);
                 if (isLocalAdmin(adminAddress)) {
                     /*
@@ -70,8 +70,8 @@ public class Others {
             return refreshThreads;
         }
 
-        protected MountTableRefresherThread getLocalRefresher(String adminAddress) {
-            return new MountTableRefresherThread(new Others.MountTableManager("local"), adminAddress);
+        protected MountTableRefresher getLocalRefresher(String adminAddress) {
+            return new MountTableRefresher(new Others.MountTableManager("local"), adminAddress);
         }
 
         private boolean isLocalAdmin(String adminAddress) {

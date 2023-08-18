@@ -51,10 +51,10 @@ public class MountTableRefresherServiceTests {
         when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
-        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        List<MountTableRefresher> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
         for (int i = 0; i < refreshThreads.size(); i++) {
             String adminAddress = refreshThreads.get(i).getAdminAddress();
-            refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithSuccess(
+            refreshThreads.set(i, new MountTableRefresher.MountTableRefresherWithSuccess(
                     new Others.MountTableManager(adminAddress), adminAddress
             ));
         }
@@ -82,10 +82,10 @@ public class MountTableRefresherServiceTests {
         when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
-        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        List<MountTableRefresher> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
         for (int i = 0; i < refreshThreads.size(); i++) {
             String adminAddress = refreshThreads.get(i).getAdminAddress();
-            refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithFailure(
+            refreshThreads.set(i, new MountTableRefresher.MountTableRefresherWithFailure(
                     new Others.MountTableManager(adminAddress), adminAddress
             ));
         }
@@ -112,21 +112,28 @@ public class MountTableRefresherServiceTests {
         when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
-        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        List<MountTableRefresher> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
         int randomNum1 = ThreadLocalRandom.current().nextInt(0, 4);
-        int randomNum2 = ThreadLocalRandom.current().nextInt(0, 4);
+        int randomNum2;
+        do {
+            randomNum2 = ThreadLocalRandom.current().nextInt(0, 4);
+        } while (randomNum2 == randomNum1);
+
         for (int i = 0; i < refreshThreads.size(); i++) {
             String adminAddress = refreshThreads.get(i).getAdminAddress();
             if (i == randomNum1 || i == randomNum2) {
-                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithSuccess(
+                refreshThreads.set(i, new MountTableRefresher.MountTableRefresherWithSuccess(
                         new Others.MountTableManager(adminAddress), adminAddress
                 ));
             } else {
-                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithFailure(
+                refreshThreads.set(i, new MountTableRefresher.MountTableRefresherWithFailure(
                         new Others.MountTableManager(adminAddress), adminAddress
                 ));
             }
         }
+        System.out.println(randomNum1);
+        System.out.println(randomNum2);
+
         when(routerStore.getRefreshThreads(states)).thenReturn(refreshThreads);
 
         // when
@@ -147,12 +154,12 @@ public class MountTableRefresherServiceTests {
         when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
-        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        List<MountTableRefresher> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         for (int i = 0; i < refreshThreads.size(); i++) {
             if (i == randomNum) {
                 String adminAddress = refreshThreads.get(i).getAdminAddress();
-                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithException(
+                refreshThreads.set(i, new MountTableRefresher.MountTableRefresherWithException(
                         new Others.MountTableManager(adminAddress), adminAddress
                 ));
             }
@@ -177,12 +184,12 @@ public class MountTableRefresherServiceTests {
         when(routerStore.getCachedRecords()).thenReturn(states);
 
         // smth more
-        List<MountTableRefresherThread> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
+        List<MountTableRefresher> refreshThreads = new Others.RouterStore().getRefreshThreads(states);
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         for (int i = 0; i < refreshThreads.size(); i++) {
             if (i == randomNum) {
                 String adminAddress = refreshThreads.get(i).getAdminAddress();
-                refreshThreads.set(i, new MountTableRefresherThread.MountTableRefresherThreadWithTimeout(
+                refreshThreads.set(i, new MountTableRefresher.MountTableRefresherWithTimeout(
                         new Others.MountTableManager(adminAddress), adminAddress
                 ));
             }

@@ -4,20 +4,17 @@ import static course.concurrency.exams.refactoring.Others.*;
 
 import java.util.concurrent.CountDownLatch;
 
-public class MountTableRefresherThread extends Thread {
+public class MountTableRefresher {
 
     private boolean success;
     /** Admin server on which refreshed to be invoked. */
     private String adminAddress;
-    private CountDownLatch countDownLatch;
     private MountTableManager manager;
 
-    public MountTableRefresherThread(MountTableManager manager,
-                                     String adminAddress) {
+    public MountTableRefresher(MountTableManager manager,
+                               String adminAddress) {
         this.manager = manager;
         this.adminAddress = adminAddress;
-        setName("MountTableRefresh_" + adminAddress);
-        setDaemon(true);
     }
 
     /**
@@ -32,8 +29,7 @@ public class MountTableRefresherThread extends Thread {
      * cache locally it need not to make RPC call. But R1 will make RPC calls to
      * update cache on R2 and R3.
      */
-    @Override
-    public void run() {
+    public void refresh() {
         success = manager.refresh();
     }
 
@@ -48,10 +44,6 @@ public class MountTableRefresherThread extends Thread {
         return success;
     }
 
-    public void setCountDownLatch(CountDownLatch countDownLatch) {
-        this.countDownLatch = countDownLatch;
-    }
-
     @Override
     public String toString() {
         return "MountTableRefreshThread [success=" + success + ", adminAddress="
@@ -62,24 +54,23 @@ public class MountTableRefresherThread extends Thread {
         return adminAddress;
     }
 
-    public static class MountTableRefresherThreadWithException extends MountTableRefresherThread {
-        public MountTableRefresherThreadWithException(MountTableManager manager, String adminAddress) {
+    public static class MountTableRefresherWithException extends MountTableRefresher {
+        public MountTableRefresherWithException(MountTableManager manager, String adminAddress) {
             super(manager, adminAddress);
         }
 
-        @Override
-        public void run() {
+        public void refresh() {
             throw new RuntimeException();
         }
     }
 
-    public static class MountTableRefresherThreadWithTimeout extends MountTableRefresherThread {
-        public MountTableRefresherThreadWithTimeout(MountTableManager manager, String adminAddress) {
+    public static class MountTableRefresherWithTimeout extends MountTableRefresher {
+        public MountTableRefresherWithTimeout(MountTableManager manager, String adminAddress) {
             super(manager, adminAddress);
         }
 
         @Override
-        public void run() {
+        public void refresh() {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -88,24 +79,24 @@ public class MountTableRefresherThread extends Thread {
         }
     }
 
-    public static class MountTableRefresherThreadWithSuccess extends MountTableRefresherThread {
-        public MountTableRefresherThreadWithSuccess(MountTableManager manager, String adminAddress) {
+    public static class MountTableRefresherWithSuccess extends MountTableRefresher {
+        public MountTableRefresherWithSuccess(MountTableManager manager, String adminAddress) {
             super(manager, adminAddress);
         }
 
         @Override
-        public void run() {
+        public void refresh() {
             setSuccess(true);
         }
     }
 
-    public static class MountTableRefresherThreadWithFailure extends MountTableRefresherThread {
-        public MountTableRefresherThreadWithFailure(MountTableManager manager, String adminAddress) {
+    public static class MountTableRefresherWithFailure extends MountTableRefresher {
+        public MountTableRefresherWithFailure(MountTableManager manager, String adminAddress) {
             super(manager, adminAddress);
         }
 
         @Override
-        public void run() {
+        public void refresh() {
             setSuccess(false);
         }
     }

@@ -63,39 +63,13 @@ public class MountTableRefresherService {
     /**
      * Refresh mount table cache of this router as well as all other routers.
      */
-//    public void refresh()  {
-//
-//        List<Others.RouterState> cachedRecords = routerStore.getCachedRecords();
-//        List<MountTableRefresherThread> refreshThreads = new ArrayList<>();
-//        for (Others.RouterState routerState : cachedRecords) {
-//            String adminAddress = routerState.getAdminAddress();
-//            if (adminAddress == null || adminAddress.length() == 0) {
-//                // this router has not enabled router admin.
-//                continue;
-//            }
-//            if (isLocalAdmin(adminAddress)) {
-//                /*
-//                 * Local router's cache update does not require RPC call, so no need for
-//                 * RouterClient
-//                 */
-//                refreshThreads.add(getLocalRefresher(adminAddress));
-//            } else {
-//                refreshThreads.add(new MountTableRefresherThread(
-//                            new Others.MountTableManager(adminAddress), adminAddress));
-//            }
-//        }
-//        if (!refreshThreads.isEmpty()) {
-//            invokeRefresh(refreshThreads);
-//        }
-//    }
-
     public void refresh() {
         List<Others.RouterState> cachedRecords = routerStore.getCachedRecords();
-        List<MountTableRefresherThread> threads = routerStore.getRefreshThreads(cachedRecords);
-        List<CompletableFuture<MountTableRefresherThread>> refreshThreads = new ArrayList<>();
-        for (MountTableRefresherThread thread : threads) {
+        List<MountTableRefresher> threads = routerStore.getRefreshThreads(cachedRecords);
+        List<CompletableFuture<MountTableRefresher>> refreshThreads = new ArrayList<>();
+        for (MountTableRefresher thread : threads) {
             refreshThreads.add(CompletableFuture.supplyAsync(() -> {
-                thread.run();
+                thread.refresh();
                 return thread;
             }).exceptionally(ex -> {
                 log("Exception occurred in mount table cache refresher");
@@ -111,7 +85,7 @@ public class MountTableRefresherService {
             log("Not all router admins updated their cache");
         }
 
-        List<MountTableRefresherThread> result = refreshThreads
+        List<MountTableRefresher> result = refreshThreads
                 .stream()
                 .filter(CompletableFuture::isDone)
                 .map(CompletableFuture::join)
@@ -124,33 +98,10 @@ public class MountTableRefresherService {
         routerClientsCache.invalidate(adminAddress);
     }
 
-    private void invokeRefresh(List<MountTableRefresherThread> refreshThreads) {
-        CountDownLatch countDownLatch = new CountDownLatch(refreshThreads.size());
-        // start all the threads
-        for (MountTableRefresherThread refThread : refreshThreads) {
-            refThread.setCountDownLatch(countDownLatch);
-            refThread.start();
-        }
-        try {
-            /*
-             * Wait for all the thread to complete, await method returns false if
-             * refresh is not finished within specified time
-             */
-            boolean allReqCompleted =
-                    countDownLatch.await(cacheUpdateTimeout, TimeUnit.MILLISECONDS);
-            if (!allReqCompleted) {
-                log("Not all router admins updated their cache");
-            }
-        } catch (InterruptedException e) {
-            log("Mount table cache refresher was interrupted.");
-        }
-        logResult(refreshThreads);
-    }
-
-    private void logResult(List<MountTableRefresherThread> refreshThreads) {
+    private void logResult(List<MountTableRefresher> refreshThreads) {
         int successCount = 0;
         int failureCount = 0;
-        for (MountTableRefresherThread mountTableRefreshThread : refreshThreads) {
+        for (MountTableRefresher mountTableRefreshThread : refreshThreads) {
             if (mountTableRefreshThread.isSuccess()) {
                 successCount++;
             } else {
