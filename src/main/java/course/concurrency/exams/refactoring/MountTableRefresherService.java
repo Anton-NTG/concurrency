@@ -77,16 +77,25 @@ public class MountTableRefresherService {
             }));
         }
 
-        CompletableFuture<Void> futures = CompletableFuture.allOf(refreshTasks.toArray(new CompletableFuture[0]));
+        /*CompletableFuture<Void> futures =*/
+        CompletableFuture.allOf(refreshTasks.toArray(new CompletableFuture[0]))
+                .completeOnTimeout(null, cacheUpdateTimeout, TimeUnit.MILLISECONDS);
 
-        try {
-            futures.get(cacheUpdateTimeout, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            log("Not all router admins updated their cache");
-        }
+
+//        try {
+//            futures.get(cacheUpdateTimeout, TimeUnit.MILLISECONDS);
+//        } catch (Exception e) {
+//            log("Not all router admins updated their cache");
+//        }
+
 
         List<MountTableRefresher> result = refreshTasks
                 .stream()
+                .peek(future -> {
+                    if (!future.isDone()) {
+                        log("Not all router admins updated their cache");
+                    }
+                })
                 .filter(CompletableFuture::isDone)
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());

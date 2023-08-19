@@ -96,6 +96,7 @@ public class MountTableRefresherServiceTests {
 
         // then
         verify(mockedService).log("Mount table entries cache refresh successCount=0,failureCount=4");
+        verify(routerClientsCache, times(4)).invalidate(anyString());
     }
 
     @Test
@@ -131,8 +132,6 @@ public class MountTableRefresherServiceTests {
                 ));
             }
         }
-        System.out.println(randomNum1);
-        System.out.println(randomNum2);
 
         when(routerStore.getRefreshTasks(states)).thenReturn(refreshTasks);
 
@@ -141,6 +140,7 @@ public class MountTableRefresherServiceTests {
 
         // then
         verify(mockedService).log("Mount table entries cache refresh successCount=2,failureCount=2");
+        verify(routerClientsCache, times(2)).invalidate(anyString());
     }
 
     @Test
@@ -171,6 +171,7 @@ public class MountTableRefresherServiceTests {
 
         // then
         verify(mockedService).log("Exception occurred in mount table cache refresher");
+        verify(routerClientsCache, atMost(4)).invalidate(anyString());
     }
 
     @Test
@@ -192,7 +193,7 @@ public class MountTableRefresherServiceTests {
                 refreshTasks.set(i, new MountTableRefresher.MountTableRefresherWithTimeout(
                         new Others.MountTableManager(adminAddress), adminAddress
                 ));
-            }
+           }
         }
         when(routerStore.getRefreshTasks(states)).thenReturn(refreshTasks);
 
@@ -201,6 +202,7 @@ public class MountTableRefresherServiceTests {
 
         // then
         verify(mockedService).log("Not all router admins updated their cache");
+        verify(routerClientsCache, atMost(3)).invalidate(anyString());
     }
 
 }
