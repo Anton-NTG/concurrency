@@ -93,12 +93,6 @@ public class MountTableRefresherService {
 
         List<MountTableRefresher> result = refreshTasks
                 .stream()
-                .peek(future -> {
-                    if (!future.isDone()) {
-                        log("Not all router admins updated their cache");
-                    }
-                })
-                .filter(CompletableFuture::isDone)
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
 
@@ -119,8 +113,10 @@ public class MountTableRefresherService {
                 failureCount++;
                 // remove RouterClient from cache so that new client is created
                 removeFromCache(mountTableRefreshThread.getAdminAddress());
-                log("Not all router admins updated their cache");
             }
+        }
+        if (failureCount > 0) {
+            log("Not all router admins updated their cache");
         }
         log(String.format(
                 "Mount table entries cache refresh successCount=%d,failureCount=%d",
