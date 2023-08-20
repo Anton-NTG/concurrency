@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.verify;
+
 public class MountTableRefresherService {
 
     private Others.RouterStore routerStore = new Others.RouterStore();
@@ -117,6 +119,7 @@ public class MountTableRefresherService {
                 failureCount++;
                 // remove RouterClient from cache so that new client is created
                 removeFromCache(mountTableRefreshThread.getAdminAddress());
+                log("Not all router admins updated their cache");
             }
         }
         log(String.format(
